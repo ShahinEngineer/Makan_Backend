@@ -1,0 +1,53 @@
+# 🚀 FastAPI Backend
+
+A production-ready backend template built with **FastAPI**, **SQLAlchemy**, and **Pydantic**.
+Includes a modular structure for easy scaling, database models, and API versioning.
+
+## create Virtual environment
+```
+    python3 -m venv .venv
+    source .venv/bin/activate
+```
+
+## Install dependencies
+```
+pip3 install -r requirements.txt
+```
+
+## run the app
+```
+uvicorn app.main:app --reload
+```
+
+## Set up environment variables
+```
+DATABASE_URL=sqlite:///./test.db
+```
+
+## Run Docker
+```
+docker compose down
+```
+
+```
+docker compose build
+```
+
+```
+docker compose up -d
+```
+
+## create migration file
+```
+alembic init alembic
+```
+
+## DB
+### create Table
+    ```
+    alembic revision --autogenerate -m "migration_name"
+    ```
+### implement migration
+```
+alembic upgrade head
+```
