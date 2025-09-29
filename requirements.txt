@@ -13,3 +13,6 @@ pytest-cov
 black
 isort
 mypy
+pydantic[email]
+pydantic_settings
+passlib[argon2]

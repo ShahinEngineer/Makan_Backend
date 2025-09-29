@@ -1,8 +1,5 @@
 from fastapi import FastAPI
-
+from app.routes import user
 app = FastAPI(title="Makan Backend")
 
-@app.get("/")
-async def read_root():
-    return {"Hello": "World"}
-# --- IGNORE ---
+app.include_router(user.router, prefix="/api")
