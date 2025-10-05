@@ -17,6 +17,7 @@ if config.config_file_name is not None:
 # add your model's MetaData object here
 from app.db.base import Base
 from app.models import user  # import your models to detect changes
+from app.models import partner  # import your models to detect changes
 
 # for 'autogenerate' support
 # from myapp import mymodel
