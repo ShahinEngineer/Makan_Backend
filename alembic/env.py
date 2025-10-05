@@ -16,8 +16,16 @@ if config.config_file_name is not None:
 
 # add your model's MetaData object here
 from app.db.base import Base
-from app.models import user  # import your models to detect changes
-from app.models import partner  # import your models to detect changes
+from app.models import user
+from app.models import categorie
+from app.models import news
+from app.models import partner
+from app.models import product
+from app.models import header
+from app.models import ourJourney
+from app.models import team
+from app.models import info
+from app.models import receivedMessages
 
 # for 'autogenerate' support
 # from myapp import mymodel

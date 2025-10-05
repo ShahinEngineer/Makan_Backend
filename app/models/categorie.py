@@ -1,8 +1,8 @@
 from sqlalchemy import Column, DateTime, String, Integer ,func
 from app.db.base import Base
 
-class Partner(Base):
-    __tablename__ = "partners"
+class Category(Base):
+    __tablename__ = "categories"
 
     id = Column(Integer, primary_key=True, index=True, unique=True)
     image_url = Column(String)
