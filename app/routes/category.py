@@ -1,11 +1,11 @@
 import os
-from isort import file
+from app.lib.funs import delete_file, save_image
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
+from app.lib.funs import save_image
 from app.schema.category import CategoryCreate, CategoryOut
 from app.lib.category import create_category, get_category, get_category_by_name, get_all_categories, edit_category, delete_category
 from app.db.session import get_db
-from uuid import uuid4
 
 router = APIRouter()
 
@@ -21,14 +21,7 @@ def create_category_endpoint(
         if existing_category:
             raise HTTPException(status_code=400, detail="Category name already exists")
 
-        image_path = None
-        if image:
-            filename = f"{uuid4().hex}_{image.filename}"
-            file_location = f"{UPLOAD_DIR}{filename}"
-            with open(file_location, "wb+") as file_object:
-                file_object.write(image.file.read())
-            image_path = file_location
-        # Create new category
+        image_path = save_image(image, UPLOAD_DIR)
         category_data = CategoryCreate(name=name, image_url=image_path)
         db_category = create_category(db, category_data)
         return db_category
@@ -63,13 +56,17 @@ def update_category_endpoint(category_id: int,
         if existing_category:
             raise HTTPException(status_code=400, detail="Category name already exists")
 
-    image_path = category.image_url
+    # Save new image and delete old one if a new image is provided
     if image:
-        filename = f"{uuid4().hex}_{image.filename}"
-        file_location = f"{UPLOAD_DIR}{filename}"
-        with open(file_location, "wb+") as file_object:
-            file_object.write(image.file.read())
-        image_path = file_location
+        image_path = save_image(image, UPLOAD_DIR)
+        if category.image_url:
+            try:
+                delete_file(category.image_url)
+            except Exception as e:
+                print(f"Error deleting old image file: {e}")
+    else:
+        image_path = category.image_url # Keep existing image if no new image is provided
+
     updated_category = CategoryCreate(name=name, image_url=image_path)
     updated_category = edit_category(db, category_id, updated_category.model_dump())
     if not updated_category:
@@ -82,7 +79,7 @@ def delete_category_endpoint(category_id: int, db: Session = Depends(get_db)):
     # delete image from folder if needed
     if CategoryOut and CategoryOut.image_url:
         try:
-            os.remove(CategoryOut.image_url)
+            delete_file(CategoryOut.image_url)
         except Exception as e:
             print(f"Error deleting image file: {e}")
     if not CategoryOut:
