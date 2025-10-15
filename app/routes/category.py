@@ -9,7 +9,7 @@ from app.db.session import get_db
 
 router = APIRouter()
 
-UPLOAD_DIR = "app/static/images/categories/"
+UPLOAD_DIR = "static/images/categories/"
 
 @router.post("/categories/", response_model=CategoryOut)
 def create_category_endpoint(

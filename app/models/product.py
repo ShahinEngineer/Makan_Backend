@@ -1,4 +1,4 @@
-from sqlalchemy import Column, String, Integer, DateTime, func, ForeignKey
+from sqlalchemy import Column, String, Integer, DateTime, func, ForeignKey, Boolean
 from sqlalchemy.dialects.postgresql import JSONB
 
 from app.db.base import Base
@@ -10,7 +10,9 @@ class Product(Base):
     name = Column(String)
     description = Column(String)
     variants = Column(JSONB)
-    photo_links = Column(JSONB)
+    image_url = Column(String)
+    feature_product = Column(Boolean, default=False)
+    visible = Column(Boolean, default=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), nullable=False)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now(), nullable=False)
 

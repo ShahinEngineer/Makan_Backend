@@ -1,4 +1,3 @@
-from models import news
 from app.models.news import News
 from app.schema.news import NewsCreate
 from sqlalchemy.orm import Session
