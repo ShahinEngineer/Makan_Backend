@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from app.routes import user
 from app.routes import category
 from app.routes import product
+from app.routes import news
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 app = FastAPI(title="Makan Backend")
@@ -9,6 +10,7 @@ app = FastAPI(title="Makan Backend")
 app.include_router(user.router, prefix="/api", tags=["Users"])
 app.include_router(category.router, prefix="/api", tags=["Categories"])
 app.include_router(product.router, prefix="/api", tags=["Products"])
+app.include_router(news.router, prefix="/api", tags=["News"])
 app.mount("/app/static", StaticFiles(directory="app/static"), name="static")
 
 # List of allowed origins

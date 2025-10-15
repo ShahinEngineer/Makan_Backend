@@ -5,11 +5,11 @@ from sqlalchemy.orm import Session
 def create_news(db: Session, news: NewsCreate) -> News:
     db_news = News(
         title=news.title,
-        subtitle=news.subtitle,
         description=news.description,
         hash_tags=news.hash_tags,
+        content=news.content,
         img_url=news.img_url,
-        photo_links=news.photo_links
+        feature_news=news.feature_news
     )
     db.add(db_news)
     db.commit()
