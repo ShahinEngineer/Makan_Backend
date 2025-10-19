@@ -21,6 +21,9 @@ def create_product(db: Session, create_product: ProductCreate) -> Product:
 def get_all_products(db: Session) -> list[Product]:
     return db.query(Product).all()
 
+def get_featured_products(db: Session) -> list[Product]:
+    return db.query(Product).filter(Product.feature_product == True).all()
+
 def get_product(db: Session, product_id: int) -> Product | None:
     return db.query(Product).filter(Product.id == product_id).first()
 

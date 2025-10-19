@@ -19,6 +19,9 @@ def create_news(db: Session, news: NewsCreate) -> News:
 def get_all_news(db: Session) -> list[News]:
     return db.query(News).all()
 
+def get_featured_news(db: Session) -> list[News]:
+    return db.query(News).filter(News.feature_news == True).all()
+
 def get_news(db: Session, news_id: int) -> News:
     return db.query(News).filter(News.id == news_id).first()
 

@@ -1,10 +1,10 @@
-from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from app.lib.funs import save_image
 from app.routes.category import UPLOAD_DIR
 from app.schema.news import NewsCreate, NewsOut
 from app.lib.new import create_news, get_all_news, get_news, edit_news, delete_news
 from app.db.session import get_db
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -30,7 +30,6 @@ def create_news_endpoint(
             content=content,
             feature_news=feature_news
         )
-        print(news, "news2313")
         db_news = create_news(db, news)
         return db_news
     except Exception as e:

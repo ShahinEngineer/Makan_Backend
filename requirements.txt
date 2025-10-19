@@ -2,6 +2,7 @@ fastapi
 uuid
 uvicorn
 sqlalchemy
+sqlalchemy2-stubs
 alembic
 pydantic
 python-dotenv
