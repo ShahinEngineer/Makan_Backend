@@ -1,4 +1,3 @@
-import os
 from app.lib.funs import delete_file, save_image
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form

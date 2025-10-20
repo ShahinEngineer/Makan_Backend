@@ -1,9 +1,5 @@
 from fastapi import FastAPI
-from app.routes import homePage, user
-from app.routes import category
-from app.routes import product
-from app.routes import news
-from app.routes import our_journey
+from app.routes import homePage, user, category, product, news, our_journey, gallary, partner,team
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -15,7 +11,12 @@ app.include_router(product.router, prefix="/api", tags=["Products"])
 app.include_router(news.router, prefix="/api", tags=["News"])
 app.include_router(our_journey.router, prefix="/api", tags=["Our Journey"])
 app.include_router(homePage.router, prefix="/api", tags=["Home Page"])
+app.include_router(gallary.router)
+app.include_router(partner.router)
+app.include_router(team.router)
+
 app.mount("/app/static", StaticFiles(directory="app/static"), name="static")
+
 
 # List of allowed origins
 origins = [

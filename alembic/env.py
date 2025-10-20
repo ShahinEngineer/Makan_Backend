@@ -26,7 +26,7 @@ from app.models import ourJourney
 from app.models import team
 from app.models import info
 from app.models import receivedMessages
-
+from app.models import gallary
 # for 'autogenerate' support
 # from myapp import mymodel
 # target_metadata = mymodel.Base.metadata
