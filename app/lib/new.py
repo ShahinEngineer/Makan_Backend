@@ -1,20 +1,32 @@
 from app.models.news import News
 from app.schema.news import NewsCreate
 from sqlalchemy.orm import Session
+from sqlalchemy import text
 
 def create_news(db: Session, news: NewsCreate) -> News:
-    db_news = News(
-        title=news.title,
-        description=news.description,
-        hash_tags=news.hash_tags,
-        content=news.content,
-        img_url=news.img_url,
-        feature_news=news.feature_news
-    )
+    db_news = News(**news.model_dump())
     db.add(db_news)
     db.commit()
     db.refresh(db_news)
     return db_news
+
+def get_new_by_lang(db: Session, lang: str) -> list[News]:
+    query = text(f"""
+        SELECT
+            id,
+            title,
+            hash_tags,
+            feature_news,
+            created_at,
+            updated_at,
+            content_{lang} AS content,
+            description_{lang} AS description,
+            img_url
+        FROM news
+    """)
+    rows = db.execute(query).fetchall()
+
+    return rows
 
 def get_all_news(db: Session) -> list[News]:
     return db.query(News).all()

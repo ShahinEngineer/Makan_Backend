@@ -2,9 +2,10 @@ from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from app.lib.funs import save_image
 from app.routes.category import UPLOAD_DIR
 from app.schema.news import NewsCreate, NewsOut
-from app.lib.new import create_news, get_all_news, get_news, edit_news, delete_news
+from app.lib.new import create_news, get_all_news, get_news, edit_news, delete_news, get_new_by_lang
 from app.db.session import get_db
 from sqlalchemy.orm import Session
+from app.models.news import News
 
 router = APIRouter()
 
@@ -15,7 +16,11 @@ def create_news_endpoint(
     name: str= File(...),
     image: UploadFile = File(...),
     description: str = File(...),
+    description_ar: str = File(...),
+    description_de: str = File(...),
     content: str = File(...),
+    content_ar: str = File(...),
+    content_de: str = File(...),
     hash_tags: str = File(...),
     feature_news: bool = File(False),
     db: Session = Depends(get_db)):
@@ -25,13 +30,28 @@ def create_news_endpoint(
         news = NewsCreate(
             title=name,
             description=description,
+            description_ar= description_ar,
+            description_de= description_de,
             hash_tags=hash_tags,
             img_url=image_url,
             content=content,
+            content_ar=content_ar,
+            content_de=content_de,
             feature_news=feature_news
         )
         db_news = create_news(db, news)
         return db_news
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
+@router.get("/news/lang/{lang}", response_model=list[NewsOut])
+def read_news_by_language(lang: str, db: Session = Depends(get_db)):
+    valid = {"en", "de", "ar", "default"}
+    try:
+        if lang not in valid:
+            raise HTTPException(status_code=400, detail=f"Unsupported language '{lang}'")
+        result = get_new_by_lang(db, lang)
+        return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
