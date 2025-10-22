@@ -14,7 +14,7 @@ def get_new_by_lang(db: Session, lang: str) -> list[News]:
     query = text(f"""
         SELECT
             id,
-            title,
+            title_{lang} AS title,
             hash_tags,
             feature_news,
             created_at,

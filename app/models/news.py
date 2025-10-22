@@ -10,6 +10,8 @@ class News(Base):
 
     id = Column(Integer, primary_key=True, index=True, unique=True)
     title = Column(String)
+    title_ar = Column(String)
+    title_de = Column(String)
     description = Column(String)
     description_ar = Column(String)
     description_de = Column(String)

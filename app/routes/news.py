@@ -13,7 +13,9 @@ UPLOAD_DIR = "app/static/images/news/"
 
 @router.post("/news/", response_model=NewsOut)
 def create_news_endpoint(
-    name: str= File(...),
+    title: str= File(...),
+    title_ar: str = File(...),
+    title_de: str = File(...),
     image: UploadFile = File(...),
     description: str = File(...),
     description_ar: str = File(...),
@@ -28,7 +30,9 @@ def create_news_endpoint(
         image_url = save_image(image, UPLOAD_DIR)
 
         news = NewsCreate(
-            title=name,
+            title=title,
+            title_ar=title_ar,
+            title_de=title_de,
             description=description,
             description_ar= description_ar,
             description_de= description_de,
@@ -50,7 +54,11 @@ def read_news_by_language(lang: str, db: Session = Depends(get_db)):
     try:
         if lang not in valid:
             raise HTTPException(status_code=400, detail=f"Unsupported language '{lang}'")
-        result = get_new_by_lang(db, lang)
+        result = []
+        if lang == "en" or lang == "default":
+            result = get_all_news(db)
+        else:
+            result = get_new_by_lang(db, lang)
         return result
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
