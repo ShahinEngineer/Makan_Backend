@@ -113,7 +113,7 @@ async def update_team_item(
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
 
-@router.delete("/{team_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{team_id}",  status_code=status.HTTP_200_OK, response_model=TeamOut)
 def delete_team_item(team_id: int, db: Session = Depends(get_db)):
     """
     Delete a team and its image file if present.
@@ -130,7 +130,7 @@ def delete_team_item(team_id: int, db: Session = Depends(get_db)):
                 delete_file(existing.image)
             except Exception:
                 pass
-        return
+        return existing
     except Exception as e:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 

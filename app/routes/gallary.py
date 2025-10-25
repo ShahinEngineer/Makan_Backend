@@ -67,18 +67,15 @@ def edit_gallary_item(
     return updated
 
 
-@router.delete("/{item_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{item_id}", response_model=GallaryOut)
 def remove_gallary(item_id: int, db: Session = Depends(get_db)):
-    item = getGallaryById(db, item_id)
-    if not item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gallery item not found")
-
-    delete_gallary(db, item_id)
-
     try:
-        delete_file(item.image, UPLOAD_DIR)
-    except Exception:
-        # ignore file deletion errors
-        pass
-
-    return None
+        item = getGallaryById(db, item_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gallery item not found")
+        delete_gallary(db, item_id)
+        if item.img_url:
+            delete_file(item.img_url)
+        return item
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Failed to delete image gallery item: " + str(e))

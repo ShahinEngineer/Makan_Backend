@@ -1,7 +1,7 @@
 import json
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, File, Form, Form, HTTPException, UploadFile
-from app.lib.funs import save_image
+from app.lib.funs import delete_file, save_image
 from app.schema.product import ProductCreate, ProductOut
 from app.lib.product import create_product, delete_product, edit_product, get_product, get_all_products
 from app.db.session import get_db
@@ -81,12 +81,21 @@ def update_product_endpoint(
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
-@router.delete("/product/{product_id}", response_model=dict)
+@router.delete("/product/{product_id}", response_model=ProductOut)
 def delete_product_endpoint(product_id: int, db: Session = Depends(get_db)):
-    product = get_product(db, product_id)
-    if not product:
-        raise HTTPException(status_code=404, detail="Product not found")
-    deleted_product = delete_product(db, product_id)
-    if not deleted_product:
-        raise HTTPException(status_code=400, detail="Failed to delete product")
-    return {"detail": "Product deleted successfully"}
+    print("Deleting product endpoint called for ID:", product_id)
+    try:
+        print("Attempting to delete product with ID:", product_id)
+        product = get_product(db, product_id)
+        if not product:
+            raise HTTPException(status_code=404, detail="Product not found")
+        deleted_product = None
+        if product.image_url:
+            delete_file(product.image_url)
+            deleted_product = delete_product(db, product_id)
+            return deleted_product
+        if not deleted_product:
+            raise HTTPException(status_code=400, detail="Failed to delete product")
+        return {"detail": "Product deleted successfully"}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail="Failed to delete product error: " + str(e))

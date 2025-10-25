@@ -28,11 +28,11 @@ def edit_gallary(db: Session, gallary_id: int, gallary: GallaryOut) -> Optional[
     db.refresh(db_gallary)
     return db_gallary
 
-def delete_gallary(db: Session, gallary_id: int) -> bool:
+def delete_gallary(db: Session, gallary_id: int) -> Gallary:
     db_gallary = db.query(Gallary).filter(Gallary.id == gallary_id).first()
     if not db_gallary:
-        return False
+        return None
     db.delete(db_gallary)
     db.commit()
-    return True
+    return db_gallary
 

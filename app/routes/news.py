@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
-from app.lib.funs import save_image
+from app.lib.funs import delete_file, save_image
 from app.routes.category import UPLOAD_DIR
 from app.schema.news import NewsCreate, NewsOut
 from app.lib.new import create_news, get_all_news, get_news, edit_news, delete_news, get_new_by_lang
@@ -112,11 +112,12 @@ def update_news_endpoint(
 
 @router.delete("/news/{news_id}", response_model=NewsOut)
 def delete_news_endpoint(news_id: int, db: Session = Depends(get_db)):
-    news = get_news(db, news_id)
-    if not news:
-        raise HTTPException(status_code=404, detail="News not found")
-
-    deleted_news = delete_news(db, news_id)
-    if not deleted_news:
+    try:
+        news = get_news(db, news_id)
+        if news and news.img_url:
+            delete_file(news.img_url)
+        deleted_news = delete_news(db, news_id)
+        return deleted_news
+    except Exception as e:
         raise HTTPException(status_code=400, detail="Failed to delete news")
-    return deleted_news
+

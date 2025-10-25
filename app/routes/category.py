@@ -72,13 +72,18 @@ def update_category_endpoint(category_id: int,
         raise HTTPException(status_code=400, detail="Failed to update category")
     return updated_category
 
-@router.delete("/categories/{category_id}", response_model=dict)
+@router.delete("/categories/{category_id}", response_model=CategoryOut)
 def delete_category_endpoint(category_id: int, db: Session = Depends(get_db)):
-    CategoryOut = delete_category(db, category_id)
+    CategoryOut = None
+    try:
+        CategoryOut = delete_category(db, category_id)
+    except Exception as e:
+         raise HTTPException(status_code=404, detail="can't delete category with products")
     # delete image from folder if needed
     if CategoryOut and CategoryOut.image_url:
         try:
             delete_file(CategoryOut.image_url)
+            return CategoryOut
         except Exception as e:
             print(f"Error deleting image file: {e}")
     if not CategoryOut:

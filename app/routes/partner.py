@@ -74,22 +74,17 @@ def update_partner_endpoint(
     return updated
 
 
-@router.delete("/{partner_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{partner_id}", status_code=status.HTTP_200_OK, response_model=PartnerOut)
 def delete_partner_endpoint(partner_id: int, db: Session = Depends(get_db)):
-    existing = get_partner_by_id(db, partner_id)
-    if not existing:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partner not found")
-
-    img = getattr(existing, "image", None)
-    if img:
-        try:
-            delete_file(img)
-        except Exception:
-            # non-fatal: continue with deletion of DB record
-            pass
-
     try:
-        delete_partner(db, partner_id)
-    except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
-    return None
+        partner = get_partner_by_id(db, partner_id)
+        if not partner:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partner not found")
+        # delete associated image file if present
+        if partner.image_url:
+            delete_partner(db, partner_id)
+            delete_file(partner.image_url)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(errors=e))
+
+    return partner
