@@ -1,10 +1,10 @@
 from app.models.categorie import Category
-from app.schema.category import CategoryCreate
+from app.schema.category import CategoryCreate, CategoryCreateLang, CategoryOutLang
 from sqlalchemy.orm import Session
 from app.models.product import Product
 
-def create_category(db: Session, category: CategoryCreate) -> Category:
-    db_category = Category(name=category.name, image_url=category.image_url)
+def create_category(db: Session, category: CategoryCreateLang) -> Category:
+    db_category = Category(name=category.name, name_ar=category.name_ar, name_de=category.name_de, image_url=category.image_url)
     db.add(db_category)
     db.commit()
     db.refresh(db_category)
@@ -49,7 +49,7 @@ def get_category(db: Session, category_id: int) -> Category:
 def get_category_by_name(db: Session, name: str) -> Category:
     return db.query(Category).filter(Category.name == name).first()
 
-def edit_category(db: Session, category_id: int, updated_data: dict) -> Category | None:
+def edit_category(db: Session, category_id: int, updated_data: dict) -> CategoryOutLang :
     category = get_category(db, category_id)
     if not category:
         return None
