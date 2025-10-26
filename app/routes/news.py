@@ -1,7 +1,8 @@
+from typing import Optional
 from fastapi import APIRouter, Depends, File, HTTPException, UploadFile
 from app.lib.funs import delete_file, save_image
 from app.routes.category import UPLOAD_DIR
-from app.schema.news import NewsCreate, NewsOut
+from app.schema.news import NewsCreate, NewsOut, NewsOutLang
 from app.lib.new import create_news, get_all_news, get_news, edit_news, delete_news, get_new_by_lang
 from app.db.session import get_db
 from sqlalchemy.orm import Session
@@ -70,17 +71,24 @@ def read_news_endpoint(news_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="News not found")
     return news
 
-@router.get("/news/", response_model=list[NewsOut])
+@router.get("/news/", response_model=list[NewsOutLang])
 def read_all_news_endpoint(db: Session = Depends(get_db)):
     news_list = get_all_news(db)
     return news_list
-@router.put("/news/{news_id}", response_model=NewsOut)
+
+@router.put("/news/{news_id}", response_model=NewsOutLang)
 def update_news_endpoint(
     news_id: int,
-    name: str = File(...),
-    image: UploadFile = File(None),
+    title: str = File(...),
+    title_ar: str = File(...),
+    title_de: str = File(...),
+    image: Optional[UploadFile] = File(None),
     description: str = File(...),
+    description_ar: str = File(...),
+    description_de: str = File(...),
     content: str = File(...),
+    content_ar: str = File(...),
+    content_de: str = File(...),
     hash_tags: str = File(...),
     feature_news: bool = File(False),
     db: Session = Depends(get_db)):
@@ -90,8 +98,14 @@ def update_news_endpoint(
         raise HTTPException(status_code=404, detail="News not found")
 
     updated_data = {
-        "title": name,
+        "title": title,
         "description": description,
+        "description_ar": description_ar,
+        "description_de": description_de,
+        "title_ar": title_ar,
+        "title_de": title_de,
+        "content_ar": content_ar,
+        "content_de": content_de,
         "content": content,
         "hash_tags": hash_tags,
         "feature_news": feature_news

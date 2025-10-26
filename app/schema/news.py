@@ -30,12 +30,14 @@ class NewsOut(BaseModel):
 class NewsOutLang(BaseModel):
     id: int
     title: str
+    title_ar: str
+    title_de: str
     description: str
     description_ar: str
     description_de: str
     content: str
     content_ar: str
-    description_de: str
+    content_de: str
     hash_tags: str
     img_url: str
     feature_news: bool
