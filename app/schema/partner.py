@@ -13,3 +13,14 @@ class PartnerOut(BaseModel):
     created_at: datetime.datetime
     updated_at: datetime.datetime
     model_config = {"from_attributes": True}
+
+
+class PartnerOutLang(BaseModel):
+    id: int
+    name: str
+    name_ar: str
+    name_de: str
+    image_url: str
+    created_at: datetime.datetime
+    updated_at: datetime.datetime
+    model_config = {"from_attributes": True}
