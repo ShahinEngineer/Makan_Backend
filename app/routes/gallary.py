@@ -13,7 +13,7 @@ router = APIRouter(prefix="/api/gallary", tags=["gallary"])
 
 UPLOAD_DIR = "app/static/images/gallary/"
 
-@router.post("/", response_model=GallaryCreate, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=GallaryOut, status_code=status.HTTP_201_CREATED)
 def create_new_gallary(
     image: UploadFile = File(...),
     db: Session = Depends(get_db),
@@ -42,27 +42,23 @@ def get_gallary(item_id: int, db: Session = Depends(get_db)):
 def edit_gallary_item(
     item_id: int,
     image: Optional[UploadFile] = File(None),
-    title: Optional[str] = Form(None),
     db: Session = Depends(get_db),
 ):
-    item = getGallaryById(db, item_id)
-    if not item:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gallery item not found")
+    try:
+        item = getGallaryById(db, item_id)
+        if not item:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gallery item not found")
+        if image:
+            delete_file(item.img_url)
 
-    new_filename = None
-    if image is not None:
-        new_filename = save_image(image, UPLOAD_DIR)
+        image_url = None
+        if image is not None:
+            image_url = save_image(image, UPLOAD_DIR)
 
-    # Call library edit function. It should handle None values if no update for that field.
-    updated = edit_gallary(db, item_id, new_filename, title)
-
-    # If a new file was saved successfully, delete the old file from disk
-    if new_filename:
-        try:
-            delete_file(item.image, UPLOAD_DIR)
-        except Exception:
-            # ignore file deletion errors
-            pass
+        # Call library edit function. It should handle None values if no update for that field.
+        updated = edit_gallary(db, item_id, image_url if image_url else item.img_url)
+    except Exception as e:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gallery item not found as: " + str(e))
 
     return updated
 
