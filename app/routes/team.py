@@ -104,7 +104,6 @@ async def update_team_item(
     db: Session = Depends(get_db),
 ):
 
-    print(social_media_links)
     existing = getById_team(db, team_id)
     if not existing:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Team not found")
@@ -114,7 +113,7 @@ async def update_team_item(
         if image:
             image_path = save_image(image, UPLOAD_DIR)
             social_media_links_json = json.loads(social_media_links)
-            print(social_media_links_json, "wew")
+
             new_image_path = image_path
         else:
             social_media_links_json = json.loads(social_media_links) if social_media_links else existing.social_media_links
