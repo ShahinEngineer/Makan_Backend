@@ -50,7 +50,6 @@ def edit_gallary_item(
             raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Gallery item not found")
         if image:
             delete_file(item.img_url)
-
         image_url = None
         if image is not None:
             image_url = save_image(image, UPLOAD_DIR)
