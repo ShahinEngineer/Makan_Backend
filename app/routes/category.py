@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Form
 from app.lib.funs import save_image
 from app.schema.category import CategoryCreate, CategoryOut, CategoryCreateLang, CategoryOutLang
-from app.lib.category import create_category, get_category, get_category_by_name, get_all_categories, edit_category, delete_category
+from app.lib.category import create_category, get_category, get_category_by_name, get_all_categories, edit_category, delete_category, get_category_by_lang
 from app.db.session import get_db
 
 router = APIRouter()
@@ -36,6 +36,22 @@ def read_category_endpoint(category_id: int, db: Session = Depends(get_db)):
     if not category:
         raise HTTPException(status_code=404, detail="Category not found")
     return category
+
+
+@router.get("/categories/lang/{lang}", response_model=list[CategoryOut])
+def read_category_by_language(lang: str, db: Session = Depends(get_db)):
+    valid = {"en", "de", "ar", "default"}
+    try:
+        if lang not in valid:
+            raise HTTPException(status_code=400, detail=f"Unsupported language '{lang}'")
+        result = []
+        if lang == "en" or lang == "default":
+            result = get_all_categories(db)
+        else:
+            result = get_category_by_lang(db, lang)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 @router.get("/categories/", response_model=list[CategoryOut])
 def read_all_categories_endpoint(db: Session = Depends(get_db)):

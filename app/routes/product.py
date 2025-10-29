@@ -2,8 +2,8 @@ import json
 from sqlalchemy.orm import Session
 from fastapi import APIRouter, Depends, File, Form, Form, HTTPException, UploadFile
 from app.lib.funs import delete_file, save_image
-from app.schema.product import ProductCreate, ProductOut
-from app.lib.product import create_product, delete_product, edit_product, get_product, get_all_products
+from app.schema.product import ProductCreate, ProductOut, ProductOutWihOutLang
+from app.lib.product import create_product, delete_product, edit_product, get_product, get_all_products, get_products_by_lang
 from app.db.session import get_db
 from typing import Dict
 
@@ -13,8 +13,12 @@ UPLOAD_DIR = "app/static/images/products/"
 @router.post("/product/", response_model=ProductOut)
 def create_product_endpoint(
     name: str = Form(...),
+    name_ar: str = Form(...),
+    name_de: str = Form(...),
     image: UploadFile = File(...),
     description: str = Form(...),
+    description_ar: str = Form(...),
+    description_de: str = Form(...),
     category_id: int = Form(...),
     feature_product: bool = Form(False),
     visible: bool = Form(True),
@@ -23,7 +27,19 @@ def create_product_endpoint(
     try:
         variants_dict = json.loads(variants)
         image_path = save_image(image, UPLOAD_DIR)  # Ensure you have a function to save the image and return its path
-        product_create =  ProductCreate(name=name, image_url=image_path, description=description, category_id=category_id, feature_product=feature_product, visible=visible, variants=variants_dict)
+        product_create =  ProductCreate(
+            name=name,
+            name_ar = name_ar,
+            name_de = name_de,
+            image_url=image_path,
+            description=description,
+            description_ar=description_ar,
+            description_de=description_de,
+            category_id=category_id,
+            feature_product=feature_product,
+            visible=visible,
+            variants=variants_dict
+            )
         db_product = create_product(db, product_create)
         return db_product
     except Exception as e:
@@ -37,6 +53,21 @@ def read_product_endpoint(product_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Product not found")
     return product
 
+@router.get("/products/lang/{lang}", response_model=list[ProductOutWihOutLang])
+def read_products_by_language(lang: str, db: Session = Depends(get_db)):
+    valid = {"en", "de", "ar", "default"}
+    try:
+        if lang not in valid:
+            raise HTTPException(status_code=400, detail=f"Unsupported language '{lang}'")
+        result = []
+        if lang == "en" or lang == "default":
+            result = get_all_products(db)
+        else:
+            result = get_products_by_lang(db, lang)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
+
 @router.get("/products/", response_model=list[ProductOut])
 def read_all_products_endpoint(db: Session = Depends(get_db)):
     products = get_all_products(db)
@@ -47,8 +78,12 @@ def read_all_products_endpoint(db: Session = Depends(get_db)):
 def update_product_endpoint(
     product_id: int,
     name: str = Form(...),
+    name_ar: str = Form(...),
+    name_de: str = Form(...),
     image: UploadFile = File(None),
     description: str = Form(...),
+    description_ar: str = Form(...),
+    description_de: str = Form(...),
     category_id: int = Form(...),
     feature_product: bool = Form(False),
     visible: bool = Form(True),
@@ -63,7 +98,11 @@ def update_product_endpoint(
         variants_dict = json.loads(variants)
         updated_data = {
             "name": name,
+            "name_ar": name_ar,
+            "name_de": name_de,
             "description": description,
+            "description_ar": description_ar,
+            "description_de": description_de,
             "category_id": category_id,
             "feature_product": feature_product,
             "visible": visible,
