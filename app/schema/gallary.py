@@ -6,6 +6,7 @@ class GallaryCreate(BaseModel):
 
 
 class GallaryOut(BaseModel):
+    id: int
     img_url: str
     created_at: datetime.datetime
     updated_at: datetime.datetime

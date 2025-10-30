@@ -10,8 +10,14 @@ class Team(Base):
 
     id = Column(Integer, primary_key=True, index=True, unique=True)
     name = Column(String)
+    name_ar = Column(String)
+    name_de = Column(String)
     role = Column(String)
+    role_ar = Column(String)
+    role_de = Column(String)
     description = Column(String)
+    description_ar = Column(String)
+    description_de = Column(String)
     image_url = Column(String)
     email = Column(String, unique=True, index=True)
     social_media_links = Column(JSONB)  # Store as JSON for flexibility

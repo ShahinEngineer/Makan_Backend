@@ -16,24 +16,25 @@ UPLOAD_DIR = "app/static/images/partner/"
 
 @router.post("/", response_model=PartnerOut, status_code=status.HTTP_201_CREATED)
 def create_partner_endpoint(
-    name: str,
-    file: UploadFile = File(...),
+    name: str   = Form(...),
+    name_ar: str = Form(...),
+    name_de: str = Form(...),
+    image: UploadFile = File(...),
     db: Session = Depends(get_db),
 ):
     image_path = None
-    if file:
+    if image:
         try:
-            image_path = save_image(file, UPLOAD_DIR)
+            image_path = save_image(image, UPLOAD_DIR)
         except Exception:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to save image")
     try:
         # create_partner(db, partner, image_path) is expected to accept (db, partner, image_path)
 
-        created = create_partner(db, image_url=image_path, name=name)
+        created = create_partner(db, image_url=image_path, name=name, name_ar=name_ar, name_de=name_de)
         return created
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
-
 
 
 
@@ -45,16 +46,20 @@ def get_partners(db: Session = Depends(get_db)):
 @router.put("/{partner_id}", response_model=PartnerOut)
 def update_partner_endpoint(
     partner_id: int,
-    partner: CreatePartner,
-    file: Optional[UploadFile] = File(None),
+    name: str = Form(...),
+    name_ar: str = Form(...),
+    name_de: str = Form(...),
+    image: Optional[UploadFile] = File(None),
     db: Session = Depends(get_db),
 ):
     existing = get_partner_by_id(db, partner_id)
+
     if not existing:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partner not found")
 
-    image_path = getattr(existing, "image", None)
-    if file:
+    image_path = getattr(existing, "image_url", None)
+
+    if image:
         # remove old file if present, then save new one
         try:
             if image_path:
@@ -63,33 +68,28 @@ def update_partner_endpoint(
             # non-fatal: log in real app, continue to attempt save
             pass
         try:
-            image_path = save_image(file)
+            image_path = save_image(image, UPLOAD_DIR)
         except Exception:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Failed to save new image")
 
     try:
-        updated = update_partner(db, partner_id, partner, image_path)
+        updated = update_partner(db, partner_id, name=name, name_ar=name_ar, name_de=name_de, image_url=image_path)
     except Exception as exc:
         raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
     return updated
 
 
-@router.delete("/{partner_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{partner_id}", status_code=status.HTTP_200_OK, response_model=PartnerOut)
 def delete_partner_endpoint(partner_id: int, db: Session = Depends(get_db)):
-    existing = get_partner_by_id(db, partner_id)
-    if not existing:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partner not found")
-
-    img = getattr(existing, "image", None)
-    if img:
-        try:
-            delete_file(img)
-        except Exception:
-            # non-fatal: continue with deletion of DB record
-            pass
-
     try:
-        delete_partner(db, partner_id)
-    except Exception as exc:
-        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(exc))
-    return None
+        partner = get_partner_by_id(db, partner_id)
+        if not partner:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Partner not found")
+        # delete associated image file if present
+        if partner.image_url:
+            delete_partner(db, partner_id)
+            delete_file(partner.image_url)
+    except Exception as e:
+        raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(errors=e))
+
+    return partner

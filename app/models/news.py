@@ -10,8 +10,16 @@ class News(Base):
 
     id = Column(Integer, primary_key=True, index=True, unique=True)
     title = Column(String)
+    title_ar = Column(String)
+    title_de = Column(String)
     description = Column(String)
+    description_ar = Column(String)
+    description_de = Column(String)
+    # content multilanugae
     content = Column(Text)  # New content field
+    content_ar = Column(Text)
+    content_de = Column(Text)
+    # content multiLnaguage
     hash_tags = Column(String)
     img_url  = Column(String)
     feature_news = Column(Boolean, default=False)
