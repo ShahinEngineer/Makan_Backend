@@ -53,18 +53,37 @@ def get_products_by_lang_v1(db: Session, lang: str) -> list[Product]:
             name_{lang} AS name,
             category_id,
             feature_product,
+            visible,
+            created_at,
+            updated_at,
+            description_{lang} AS description,
+            image_url,
+            updated_at
+        FROM products
+    """)
+    rows = db.execute(query).mappings().all()  # ✅ returns dicts, not tuples
+    return [dict(row) for row in rows]
+
+
+def get_products_by_lang_v2(db: Session, lang: str) -> list[Product]:
+    query = text(f"""
+        SELECT
+            id,
+            name_{lang} AS name,
+            category_id,
+            feature_product,
             variants,
             visible,
             created_at,
             updated_at,
             description_{lang} AS description,
             image_url,
-            created_at,
             updated_at
         FROM products
     """)
     rows = db.execute(query).mappings().all()  # ✅ returns dicts, not tuples
     return [dict(row) for row in rows]
+
 
 def get_featured_products(db: Session) -> list[Product]:
     return db.query(Product).filter(Product.feature_product == True).all()
